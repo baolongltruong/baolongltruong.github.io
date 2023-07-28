@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Baolong Truong - CS416 Narrative Visualization</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="styles/styles.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    </head>
+
+    <body>
+        <!-- intro -->
+        <h1>Pokémon Narrative Visualization</h1>
+        <h3>By: Baolong Le Truong</h2><br>
+        <h4>ABOUT</h4>
+        <p>The bar graphs below show the average value for each pokémon type's skill.</p><br>
+        <h4>HOW IT WORKS</h4>
+        <p>By clicking the different buttons below, you can observe the average value of each pokémon type's attack, defense, speed, and total strength
+        (total of the average attack + defense + speed).</p><br>
+
+        <!-- d3.js -->
+        <script src="https://d3js.org/d3.v4.js"></script>
+
+        <!-- d3-annotation -->
+        <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+
+        <div id="graph">
+            <div id="buttons">
+                <button class="button" autofocus onclick="update('average_attack')">ATTACK</button>
+                <button class="button" onclick="update('average_defense')">DEFENSE</button>
+                <button class="button" onclick="update('average_speed')">SPEED</button>
+                <button class="button" onclick="update('average_total')">TOTAL STRENGTH</button>
+            </div>
+
+            <!-- bar graph -->
+            <div id="bar_graph"></div>
+        </div>
+    </body>
+</html>
+
+<script>
+
+    // dimensions & margins
+    var margin = { top: 30, right: 130, bottom: 70, left: 60 },
+        width = 800 - margin.left - margin.right,
+        height = 600 - margin.top - margin.bottom;
+
+    // append the svg object
+    var svg = d3.select("#bar_graph")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+
+    // X axis
+    var x = d3.scaleBand()
+        .range([0, width])
+        .padding(0.2);
+
+    var xAxis = svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+
+    // X axis label
+    svg.append("text")
+        .attr("text-anchor", "end")
+        .attr("x", width)
+        .attr("y", height + margin.top + 20)
+        .text("Pokémon Type");
+
+    // Y axis
+    var y = d3.scaleLinear()
+        .range([height, 0]);
+    var yAxis = svg.append("g")
+        .attr("class", "myYaxis")
+
+    // Y axis label
+    svg.append("text")
+        .attr("text-anchor", "end")
+        .attr("transform", "rotate(-90)")
+        .attr("y", -margin.left + 20)
+        .attr("x", -margin.top)
+        .text("Average Value")
+
+    // update bar graphs
+    function update(selectedVar) {
+
+        // read csv file
+        d3.csv("", function (data) {
+
+            // X axis
+            x.domain(data.map(function (d) { return d.type; }))
+            xAxis.transition().duration(1000).call(d3.axisBottom(x))
+
+            // Y axis
+            y.domain([0, d3.max(data, function (d) { return +d[selectedVar] })]);
+            yAxis.transition().duration(1000).call(d3.axisLeft(y));
+
+            // u = map data to existing bars
+            var u = svg.selectAll("rect")
+                .data(data)
+
+            // update bars
+            u
+                .enter()
+                .append("rect")
+                .merge(u)
+                .transition()
+                .duration(1000)
+                .attr("x", function (d) { return x(d.type); })
+                .attr("y", function (d) { return y(d[selectedVar]); })
+                .attr("width", x.bandwidth())
+                .attr("height", function (d) { return height - y(d[selectedVar]); })
+                .attr("fill", function (d) { if (d.type == 'Grass') return "#7AC74C";
+                                            if (d.type == 'Fire') return "#EE8130";
+                                            if (d.type == 'Water') return "#6390F0";  
+                                            if (d.type == 'Bug') return "#A6B91A"; 
+                                            if (d.type == 'Normal') return "#A8A77A"; 
+                                            if (d.type == 'Poison') return "#A33EA1"; 
+                                            if (d.type == 'Electric') return "#F7D02C"; 
+                                            if (d.type == 'Ground') return "#E2BF65"; 
+                                            if (d.type == 'Fairy') return "#D685AD";
+                                            if (d.type == 'Fighting') return "#C22E28";
+                                            if (d.type == 'Psychic') return "#F95587";
+                                            if (d.type == 'Rock') return "#B6A136";
+                                            if (d.type == 'Ghost') return "#735797";
+                                            if (d.type == 'Ice') return "#96D9D6";
+                                            if (d.type == 'Dragon') return "#6F35FC";
+                                            if (d.type == 'Dark') return "#705746";
+                                            if (d.type == 'Steel') return "#B7B7CE";
+                                            if (d.type == 'Flying') return "#A98FF3"; 
+                                             else return "#000000" })
+        
+            // annotation for attack
+            if (selectedVar == 'average_attack') {
+                    d3.select(".annotations").remove()
+                    const annotations = [
+                    {
+                        note: {
+                            label: "The highest attack is Dragon type with an average attack of 105.76.",
+                            title: "Dragon",
+                            wrap: 120,
+                            padding: 10 
+
+                        },
+                        color: ["#000000"],
+                        x: 490,
+                        y: 10,
+                        dy: 20,
+                        dx: 125
+                    }
+                ]
+
+                const makeAnnotations = d3.annotation()
+                    .annotations(annotations)
+                svg.append("g")
+                    .call(makeAnnotations)
+            }
+            // annotation for defense
+            else if (selectedVar == 'average_defense') {
+                d3.select(".annotations").remove()
+                const annotations = [
+                    {
+                        note: {
+                            label: "The highest defense is Steel type with an average defense of 116.61.",
+                            title: "Steel",
+                            wrap: 120,
+                            padding: 10
+
+                        },
+                        color: ["#000000"],
+                        x: 560,
+                        y: 10,
+                        dy: 20,
+                        dx: 60
+                    }
+                ]
+
+                const makeAnnotations = d3.annotation()
+                    .annotations(annotations)
+                svg.append("g")
+                    .call(makeAnnotations)
+            }
+            // annotation for speed
+            else if (selectedVar == 'average_speed') {
+                d3.select(".annotations").remove()
+                const annotations = [
+                    {
+                        note: {
+                            label: "The highest speed is Flying type with an average speed of 86.39.",
+                            title: "Flying",
+                            wrap: 120,
+                            padding: 10  
+
+                        },
+                        color: ["#000000"],
+                        x: 590,
+                        y: 10,
+                        dy: 20,
+                        dx: 30
+                    }
+                ]
+
+                const makeAnnotations = d3.annotation()
+                    .annotations(annotations)
+                svg.append("g")
+                    .call(makeAnnotations)
+            }
+            // annotation for total strength
+            else if (selectedVar == 'average_total') {
+                d3.select(".annotations").remove()
+                const annotations = [
+                    {
+                        note: {
+                            label: "The highest total pokémon strength (average of attack + defense + speed) is Dragon type with an average total of 274.52.",
+                            title: "Dragon",
+                            wrap: 120, 
+                            padding: 10  
+
+                        },
+                        color: ["#000000"],
+                        x: 490,
+                        y: 10,
+                        dy: 20,
+                        dx: 125
+                    }
+                ]
+
+                const makeAnnotations = d3.annotation()
+                    .annotations(annotations)
+                svg.append("g")
+                    .call(makeAnnotations)
+            }
+            // clear annotations
+            else {
+                d3.select(".annotations").remove()
+            }
+        })
+    }
+
+    // default graph attack
+    update('average_attack')
+
+</script>
