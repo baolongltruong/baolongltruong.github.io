@@ -88,7 +88,7 @@
     function update(selectedVar) {
 
         // read csv file
-        d3.csv("", function (data) {
+        d3.csv("https://raw.githubusercontent.com/baolongltruong/baolongltruong.github.io/main/data/pokemon_stats.csv", function (data) {
 
             // X axis
             x.domain(data.map(function (d) { return d.type; }))
